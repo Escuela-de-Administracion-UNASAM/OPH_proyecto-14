@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPH_proyecto – Objetivos, Preguntas e Hipótesis</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#1b2230;--mu:#5b6578;--ac:#1d4ed8;--bd:#d9dfec}
+@media (prefers-color-scheme:dark){:root{--bg:#10141c;--card:#1a2030;--tx:#e8ecf5;--mu:#9aa5bb;--ac:#6b9bff;--bd:#2c3550}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tx);line-height:1.45}
+header{padding:18px 20px;border-bottom:1px solid var(--bd);background:var(--card)}
+h1{margin:0;font-size:1.25rem}header p{margin:4px 0 0;color:var(--mu);font-size:.9rem}
+main{max-width:1100px;margin:auto;padding:16px;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+label{display:block;font-size:.82rem;font-weight:600;margin-bottom:4px}
+input,select,textarea{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:80px}
+button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;margin:12px 8px 0 0}
+button.sec{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+h2{font-size:1rem;margin:0 0 10px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:700px;font-size:.88rem}
+th,td{border:1px solid var(--bd);padding:8px;vertical-align:top;text-align:left}
+th{background:var(--bg)}
+.tag{font-weight:700;color:var(--ac);text-align:center}
+.cred{font-size:.82rem;color:var(--mu)}
+.chk{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.85rem}.chk input{width:auto}
+</style>
+</head>
+<body>
+<header>
+<h1>Creador de Objetivos, Preguntas e Hipótesis (OPH)</h1>
+<p>Nivel correlacional y descriptivo · Bivariadas y multivariadas · Escuela de Administración, UNASAM</p>
+</header>
+<main>
+<section class="card">
+<h2>1. Datos del proyecto</h2>
+<div class="grid">
+<div><label>Autor(es) del proyecto</label><input id="autor" placeholder="Nombres y apellidos"></div>
+<div><label>Modelo de redacción (autor de referencia)</label>
+<select id="modelo">
+<option value="HS">Hernández Sampieri (HS)</option>
+<option value="AVH">Arístides Vara Horna (AVH)</option>
+<option value="LV">Luis Villanueva (LV)</option>
+</select></div>
+<div><label>Nivel</label>
+<select id="nivel"><option value="cor">Correlacional</option><option value="des">Descriptivo</option></select></div>
+<div><label>Organización / Empresa</label><input id="org" placeholder="Ej. Municipalidad Provincial de Huaraz"></div>
+<div><label>Población</label><input id="pob" placeholder="Ej. los trabajadores"></div>
+<div><label>Ámbito geográfico</label><input id="geo" placeholder="Ej. Huaraz, Áncash"></div>
+<div><label>Año</label><input id="anio" placeholder="2026"></div>
+</div>
+</section>
+<section class="card">
+<h2>2. Variables y dimensiones</h2>
+<div class="grid">
+<div><label>Variable 1 (V1)</label><input id="v1" placeholder="Ej. Liderazgo"></div>
+<div><label>Dimensiones de V1 (una por línea)</label><textarea id="d1" placeholder="D1V1&#10;D2V1&#10;D3V1"></textarea></div>
+<div><label>Variable 2 (V2)</label><input id="v2" placeholder="Ej. Desempeño laboral"></div>
+<div><label>Dimensiones de V2 (una por línea)</label><textarea id="d2" placeholder="D1V2&#10;D2V2"></textarea></div>
+<div><label>Variable 3 (opcional, para multivariada)</label><input id="v3" placeholder="Ej. Clima organizacional"></div>
+</div>
+<div class="chk"><input type="checkbox" id="inv"><span>Incluir también dimensiones de V1 con V2 (cruce inverso)</span></div>
+<button onclick="generar()">Generar OPH</button>
+<button class="sec" onclick="ejemplo()">Cargar ejemplo</button>
+</section>
+<section class="card" id="out" style="display:none">
+<h2>3. Resultado</h2>
+<div class="tw"><table id="tabla"></table></div>
+<button onclick="copiar()">Copiar texto</button>
+<button class="sec" onclick="window.print()">Imprimir / PDF</button>
+<p class="cred" id="cred"></p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const lista=a=>a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' y '+a[a.length-1];
+const lines=t=>t.split('\n').map(s=>s.trim()).filter(Boolean);
+const M={
+ HS:{q:'¿Cuál es la relación entre',o:'Determinar la relación entre',h:'Existe relación significativa entre',n:'No existe relación significativa entre',
+     dq:'¿Cuál es el nivel de',dobj:'Describir el nivel de',dh:'El nivel de',nom:'Hernández-Sampieri (HS)'},
+ AVH:{q:'¿Qué relación existe entre',o:'Establecer la relación entre',h:'Existe relación directa y significativa entre',n:'No existe relación directa y significativa entre',
+     dq:'¿Cómo se presenta',dobj:'Identificar el nivel de',dh:'El nivel de',nom:'Vara-Horna (AVH)'},
+ LV:{q:'¿Cuál es el grado de relación entre',o:'Analizar la relación entre',h:'Existe relación estadísticamente significativa entre',n:'No existe relación estadísticamente significativa entre',
+     dq:'¿En qué nivel se encuentra',dobj:'Caracterizar el nivel de',dh:'El nivel de',nom:'Villanueva (LV)'}
+};
+let filas=[];
+function generar(){
+ const m=M[$('modelo').value],cor=$('nivel').value==='cor';
+ const v1=$('v1').value.trim(),v2=$('v2').value.trim(),v3=$('v3').value.trim();
+ if(!v1||!v2){alert('Escribe al menos V1 y V2');return}
+ const d1=lines($('d1').value),d2=lines($('d2').value);
+ const ctx=[$('pob').value.trim(),$('org').value.trim()?'de '+$('org').value.trim():'',$('geo').value.trim(),$('anio').value.trim()].filter(Boolean).join(', ');
+ const c=ctx?' en '+ctx:'';
+ const vars=[v1,v2];if(v3)vars.push(v3);
+ const mk=(items)=>{
+  const t=lista(items);
+  if(cor)return{q:`${m.q} ${t}${c}?`,o:`${m.o} ${t}${c}.`,h:`${m.h} ${t}${c}.`,h0:`${m.n} ${t}${c}.`};
+  return{q:`${m.dq} ${t}${c}?`,o:`${m.dobj} ${t}${c}.`,h:`${m.dh} ${t}${c} es [alto/medio/bajo] (definir según baremo).`,h0:''};
+ };
+ filas=[{t:'G',...mk(vars)}];
+ d2.forEach(d=>filas.push({t:'E',...mk([v1,`la dimensión ${d} de ${v2}`])}));
+ if($('inv').checked)d1.forEach(d=>filas.push({t:'E',...mk([`la dimensión ${d} de ${v1}`,v2])}));
+ if(!cor&&!d2.length)d1.forEach(d=>filas.push({t:'E',...mk([`la dimensión ${d} de ${v1}`])}));
+ let h='<tr><th></th><th>Pregunta</th><th>Objetivo</th><th>Hipótesis</th></tr>';
+ filas.forEach(f=>{h+=`<tr><td class="tag">${f.t}</td><td>${esc(f.q)}</td><td>${esc(f.o)}</td><td><b>H<sub>i</sub>:</b> ${esc(f.h)}${f.h0?`<br><b>H<sub>0</sub>:</b> ${esc(f.h0)}`:''}</td></tr>`});
+ $('tabla').innerHTML=h;
+ $('cred').innerHTML=`<b>Créditos:</b> Proyecto de ${esc($('autor').value||'[autor]')}. Redacción basada en ${esc(m.nom)}; referencias: Hernández-Sampieri (HS), Vara-Horna (AVH) y Villanueva (LV). Escuela de Administración, UNASAM. G = general, E = específico.`;
+ $('out').style.display='block';$('out').scrollIntoView({behavior:'smooth'});
+}
+function copiar(){
+ let t='';filas.forEach(f=>{t+=`[${f.t}]\nPregunta: ${f.q}\nObjetivo: ${f.o}\nHi: ${f.h}\n${f.h0?'H0: '+f.h0+'\n':''}\n`});
+ t+=$('cred').innerText;
+ navigator.clipboard.writeText(t).then(()=>alert('Copiado'),()=>{prompt('Copia manualmente:',t)});
+}
+function ejemplo(){
+ $('autor').value='Tu nombre';$('org').value='Municipalidad Provincial de Huaraz';$('pob').value='los trabajadores';
+ $('geo').value='Huaraz, Áncash';$('anio').value='2026';$('v1').value='el liderazgo';$('v2').value='el desempeño laboral';
+ $('d1').value='Transformacional\nTransaccional\nLaissez-faire';$('d2').value='Eficiencia\nEficacia';
+}
+</script>
+</body>
+</html>
